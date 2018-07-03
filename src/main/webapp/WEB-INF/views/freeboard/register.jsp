@@ -1,41 +1,34 @@
 <!DOCTYPE HTML>
 <!--
-    Hielo by TEMPLATED
-    templated.co @templatedco
-    Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+	Hielo by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
 -->
-<html>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+	<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<html>
 <head>
 <title>Hielo by TEMPLATED</title>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="/resources/css/main.css" />
+<link rel="stylesheet" href="/resources/css/main.css?ver=1" />
+
 <style>
-
-.contentbox {
-	min-height: 500px;
-}
-
-.mytable {
-	width: 70%;
-	margin-left: auto;
-	margin-right: auto;
-}
-
 .subpage {
 	background: linear-gradient(120deg, #D3959B, #BFE6BA) fixed
 }
 
 .outer {
 	padding-top: 5%;
-	padding-bottom: 5%;
 	background-color: #ffffff;
 	background-color: rgba(255, 255, 255, 0.6);
+}
+
+.mytable {
+	width: 70%;
+	margin-left: auto;
+	margin-right: auto;
 }
 .fileDrop
 {
@@ -97,6 +90,10 @@ text-align: center;
     display: inline-block;
 
 }
+    
+/* body {
+	background-image: url(/resources/images/bg.jpg);
+} */
 </style>
 </head>
 <body class="subpage">
@@ -145,25 +142,31 @@ text-align: center;
 			</header>
 		</div>
 	</section>
-	<!-- Main -->
 
+	<!-- Main -->
 	<div id="main" class="container">
 		<div class="outer">
-
 			<div class="mytable">
-				<h3>Modify</h3>
-				<form method="post" action="modify" id="registerForm">
+				<h3>form</h3>
+
+				<form method="post" action="register" id="registerForm">
 					<div class="row uniform">
 						<div class="6u 12u$(xsmall)">
-							<input type="text" name="title" id="title" id="name" value="${vo.title}" />
+							<input type="text" name="title" id="name" value="제목"
+								placeholder="title" />
 						</div>
+
 						<div class="6u 12u$(xsmall)">
-							<input type="text" name="writer" id="writer" value='<sec:authentication property="principal.username"/>' 
-							readonly="readonly"	placeholder="writer" />
+
+						<input type="text" name="writer" id="writer" value="user01"/>
+							<%-- <input type="text" name="writer" id="writer" value='<sec:authentication property="principal.username"/>' 
+							readonly="readonly"	placeholder="writer" /> --%>
+
 						</div>
+
 						<div class="12u$">
 							<textarea name="content" id="message"
-								placeholder="Enter your message" rows="20">${vo.content}</textarea>
+								placeholder="Enter your message" rows="20"></textarea>
 						</div>
 						<h3>File Upload</h3>
 						<div class="fileDrop">
@@ -171,30 +174,29 @@ text-align: center;
 						Drag&Drop file here.
 						</div>
 					<div class="uploadedList">
+					
 					</div>
+
 						<div class="12u$">
 							<ul class="actions">
-								<li><input type="button" class="special list" value="Cancel"></li>
-								<li><input type="submit" class="special list" value="Register"></li>
+								<li><input type="button" class="special list" value="List"></li>
+								<li><input type="submit" class="special list" value=" Register"></li>
+								<input type="hidden" name = "${_csrf.parameterName}" value ="${_csrf.token}">
 							</ul>
 						</div>
 					</div>
-					<input type="hidden" name="fno" value="${vo.fno}">
-					<input type="hidden" name="keyword" value="${cri.keyword}">
-					<input type="hidden" name="page" value="${cri.page}">
-					<input type="hidden" name="type" value="${cri.type}">
-					<input type="hidden" name = "${_csrf.parameterName}" value ="${_csrf.token}">
 				</form>
-
-
+				<hr />
 			</div>
 		</div>
+
 	</div>
 
 
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
 		integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 		crossorigin="anonymous"></script>
+
 		
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.js"></script>
 <script id="template" type="text/x-handlebars-template">
@@ -203,108 +205,106 @@ text-align: center;
 <a href="{{getLink}}" class="mailbox-attachment-name">{{fileName}}</a>
 <a href="{{fullName}}" class="btn btn-default btn-xs pull-right delbtn"><i class="fa fa-fw fa-remove"></i></a></div>
 </li>
-</script>		
-		
-		
-		
-	<script>
+</script>
+
+
+<script>
+
+$(document).ready(function(){
+
 	
-		$(document).ready(function() {
+	
+	var template = Handlebars.compile($("#template").html());
+	$(".fileDrop").on("dragenter dragover", function(e){
+			e.preventDefault();		
+	});
 
-			$(".list").on("click", function(e) {
-				self.location = "/board/list${cri.makeSearch(cri.page)}";
-			});
+	
+	
+	$(".fileDrop").on("drop", function(e){
+		e.preventDefault();
+	
+		var files = e.originalEvent.dataTransfer.files;		
+		var file = files[0];		
+		var fileSize = file.size;
+		var maxSize  =5*1024*1024; 
+	
+		console.log("filesize",fileSize);
+if(fileSize<maxSize){			
+		var formData = new FormData();
+		console.log("size", fileSize);
+		formData.append("file" , file);
+		$.ajax({
+			url: '/ex/uploadAjax',
+			data:formData,
+			dataType: 'text',
+			processData:false,
+			contentType:false,
+			type: 'POST',
+			success: function(data){		
+				console.log("data.....",data);	     	   
+				var fileInfo = getFileInfo(data);	     	   
+	     	   console.log("FileInfo....",fileInfo);	     	   
+	       	   var html = template(fileInfo);
+	         	$(".uploadedList").append(html);
+	         }
+		})
+		}else{
+     	console.log("체크하고있다.",maxSize);
+     	alert("첨부파일 사이즈는 5MB 이내로 등록 가능합니다.    ");
+     	return ;
+ }
+	});
+	
+       $("#registerForm").submit(function(e){
+    	   
+    	   e.preventDefault();
+    	   var that =$(this);
+    	   console.log("that..1",that);
+    	   var str="";
+    	   $(".uploadedList .delbtn").each(function(index){
+     		  str+="<input type='hidden' name ='files["+index+"]' value='"+$(this).attr("href")+"'>";
+     		  /* alert(index); */
+     		  });
+    	   
+    	   	 console.log("that..2",that.get(0));
+    	   
+      		 that.append(str);
+     	 	 that.get(0).submit();
+     	 	 
+      	 });
+       
+   	$(".uploadedList").on("click",".delbtn",function(e){
+   		e.preventDefault();
+		e.stopPropagation();
+   		console.log("click remove....");
+		var that = $(this);
+		
+		$.ajax({
+			url: '/ex/deleteFile',
+			type: 'POST',
+			data:{fileName:$(this).attr("href")},
+			dataType: 'text',
+			success:function(result){
+				if(result =='deleted'){
+					that.parent("div").parent("span").parent("span").parent("li").remove();
+					alert("deleted");
+					/* console.dir(that);
+					console.log(that.parent("div").parent("span").parent("span").parent("li")); */
+				}
+			}
+			
+			
 		});
 		
-		var template = Handlebars.compile($("#template").html());
-		$(".fileDrop").on("dragenter dragover", function(e){
-				e.preventDefault();		
-		});
+   	});
+       
+});
+   
 
-		$(".fileDrop").on("drop", function(e){
-			e.preventDefault();
-			
-			var files = e.originalEvent.dataTransfer.files;
-			
-			var file = files[0];
-			
-			var formData = new FormData();
-			
-			formData.append("file" , file);
-			
-			
-			$.ajax({
-				url: '/ex/uploadAjax',
-				data:formData,
-				dataType: 'text',
-				processData:false,
-				contentType:false,
-				type: 'POST',
-				success: function(data){
 
-			
-					console.log("data.....",data);
-		     	   
-					var fileInfo = getFileInfo(data);
-		     	   
-		     	   console.log("FileInfo....",fileInfo);
-		     	   
-		       	   var html = template(fileInfo);
-		       	   
-		       	   console.log("html....", html);
-		       	   
-					$(".uploadedList").append(html);
-				
-				}
-			});
-			
-			console.log(file);
-		});
-	       $("#registerForm").submit(function(e){
-	    	   
-	    	   e.preventDefault();
-	    	   var that =$(this);
-	    	   console.log("that..1",that);
-	    	   var str="";
-	    	   $(".uploadedList .delbtn").each(function(index){
-	     		  str+="<input type='hidden' name ='files["+index+"]' value='"+$(this).attr("href")+"'>";
-	     		  alert(index);
-	     		  });
-	    	   
-	    	   	 console.log("that..2",that.get(0));
-	    	   
-	      		 that.append(str);
-	     	 	 that.get(0).submit();
-	     	 	 
-	      	 });
-	       
-	   	$(".uploadedList").on("click",".delbtn",function(e){
-	   		e.preventDefault();
-			e.stopPropagation();
-	   		console.log("click remove....");
-			var that = $(this);
-			
-			$.ajax({
-				url: '/ex/deleteFile',
-				type: 'POST',
-				data:{fileName:$(this).attr("href")},
-				dataType: 'text',
-				success:function(result){
-					if(result =='deleted'){
-						that.parent("div").parent("span").parent("span").parent("li").remove();
-						alert("deleted");
-						console.dir(that);
-						console.log(that.parent("div").parent("span").parent("span").parent("li"));
-					}
-				}
-				
-				
-			});
-			
-	   	});
-	       
-		
-	</script>
+</script>
+
 <script type="text/javascript" src="/resources/js/upload.js"></script>	
 	<!-- Footer -->
 	<footer id="footer">
@@ -319,13 +319,24 @@ text-align: center;
 						class="label">Email</span></a></li>
 			</ul>
 		</div>
-		<div class="copyright">Untitled. All rights reserved.</div>
+		<div class="copyright">&copy; Untitled. All rights reserved.</div>
 	</footer>
+
 	<!-- Scripts -->
 	<script src="/resources/js/jquery.min.js"></script>
 	<script src="/resources/js/jquery.scrollex.min.js"></script>
 	<script src="/resources/js/skel.min.js"></script>
 	<script src="/resources/js/util.js"></script>
 	<script src="/resources/js/main.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+		integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+		crossorigin="anonymous"></script>
+	<script>
+		$(document).ready(function(e) {
+			$(".actions").on("click", ".list", function(e) {
+				self.location = "/board/list${cri.makeSearch(cri.page)}";
+			});
+		});
+	</script>
 </body>
 </html>
